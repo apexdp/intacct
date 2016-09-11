@@ -1,37 +1,19 @@
 module Intacct
-  class Bill < Intacct::Base
+  class APPayment < Intacct::Base
     attr_accessor :customer_data
     define_hook :custom_bill_fields, :bill_item_fields
 
     def create
-      return false if object.payment.intacct_system_id.present?
-
-      # Need to create the customer if one doesn't exist
-      unless object.customer.intacct_system_id
-        intacct_customer = Intacct::Customer.new object.customer
-        unless intacct_customer.create
-          raise 'Could not grab Intacct customer data'
-        end
-      end
-
-      # Create vendor if we have one and not in Intacct
-      if object.vendor and object.vendor.intacct_system_id.blank?
-        intacct_vendor = Intacct::Vendor.new object.vendor
-        if intacct_vendor.create
-          object.vendor = intacct_vendor.object
-        else
-          raise 'Could not create vendor'
-        end
-      end
+      return false if object.intacct_system_id.present?
 
       send_xml('create') do |xml|
         xml.function(controlid: "f1") {
-          xml.send("create_bill") {
-            bill_xml xml
+          xml.send("create_paymentrequest") {
+            ap_payment_xml xml
           }
         }
       end
-
+      puts response
       successful?
     end
 
@@ -114,25 +96,22 @@ module Intacct
       "#{intacct_bill_prefix}#{object.payment.id}"
     end
 
-    def bill_xml xml
-      xml.vendorid object.vendor.intacct_system_id
-      xml.datecreated {
-        xml.year object.payment.created_at.strftime("%Y")
-        xml.month object.payment.created_at.strftime("%m")
-        xml.day object.payment.created_at.strftime("%d")
+    def ap_payment_xml xml
+      xml.bankaccountid object.bank_account_id
+      xml.vendorid object.vendor_id
+      xml.paymentmethod object.payment_method
+      xml.paymentdate {
+        xml.year object.payment_date.strftime("%Y")
+        xml.month object.payment_date.strftime("%m")
+        xml.day object.payment_date.strftime("%d")
       }
-      xml.dateposted {
-        xml.year object.payment.created_at.strftime("%Y")
-        xml.month object.payment.created_at.strftime("%m")
-        xml.day object.payment.created_at.strftime("%d")
+      xml.paymentrequestitems {
+        xml.paymentrequestitem {
+          xml.key object.bill_key
+          xml.paymentamount object.amount
+        }
       }
-      xml.datedue {
-        xml.year object.payment.paid_at.strftime("%Y")
-        xml.month object.payment.paid_at.strftime("%m")
-        xml.day object.payment.paid_at.strftime("%d")
-      }
-      run_hook :custom_bill_fields, xml
-      run_hook :bill_item_fields, xml
+      xml.documentnumber object.check_number
     end
 
     def set_intacct_system_id
