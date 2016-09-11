@@ -16,7 +16,7 @@ module Intacct
     end
 
     def get *fields
-      return false unless object.intacct_system_id.present?
+      #return false unless object.intacct_system_id.present?
 
       fields = [
         :customerid,
@@ -26,7 +26,7 @@ module Intacct
 
       send_xml('get') do |xml|
         xml.function(controlid: "f4") {
-          xml.get(object: "customer", key: "#{intacct_system_id}") {
+          xml.get(object: "customer", key: "intacct_system_id") {
             xml.fields {
               fields.each do |field|
                 xml.field field.to_s
@@ -45,6 +45,39 @@ module Intacct
       end
 
       successful?
+    end
+
+    def get_list *fields
+      #return false unless object.intacct_system_id.present?
+
+      fields = [
+        :customerid,
+        :name,
+        :termname
+      ] if fields.empty?
+
+      send_xml('get_list') do |xml|
+        xml.function(controlid: "f4") {
+          xml.get_list(object: "customer", maxitems: "10", showprivate:"false") {
+            # xml.fields {
+            #   fields.each do |field|
+            #     xml.field field.to_s
+            #   end
+            # }
+          }
+        }
+      end
+
+      # if successful?
+      #   @data = OpenStruct.new({
+      #     id: response.at("//customer//customerid").content,
+      #     name: response.at("//customer//name").content,
+      #     termname: response.at("//customer//termname").content
+      #   })
+      # end
+      #
+      # successful?
+      puts response
     end
 
     def update updated_customer = false

@@ -3,6 +3,43 @@ module Intacct
     attr_accessor :customer_data
     define_hook :custom_invoice_fields
 
+    def get_list *fields
+      # return false unless object.intacct_system_id.present?
+
+      fields = [
+        :customerid,
+        :name,
+        :termname
+      ] if fields.empty?
+
+      send_xml('get_list') do |xml|
+        xml.function(controlid: "f4") {
+          xml.get_list(object: "invoice", maxitems: "10", showprivate:"false") {
+            # xml.fields {
+            #   fields.each do |field|
+            #     xml.field field.to_s
+            #   end
+            # }
+          }
+        }
+      end
+
+      if successful?
+        @data = []
+        @response.xpath('//invoice').each do |invoice|
+          @data << Invoice.new({
+             id: invoice.at("//customerid").content,
+             total: invoice.at("//totalamount").content,
+             total_paid: invoice.at("//totalpaid").content,
+             termname: invoice.at("//termname").content
+           })
+        end
+        @data
+      else
+        false
+      end
+    end
+
     def create
       return false if object.invoice.intacct_system_id.present?
 
@@ -75,10 +112,6 @@ module Intacct
 
     def set_intacct_system_id
       object.invoice.intacct_system_id = intacct_object_id
-    end
-
-    def set_intacct_key key
-      object.invoice.intacct_key = key
     end
 
     def delete_intacct_system_id

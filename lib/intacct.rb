@@ -2,6 +2,7 @@ require "intacct/version"
 require 'net/http'
 require 'nokogiri'
 require 'hooks'
+require 'ostruct'
 require "intacct/base"
 require "intacct/customer"
 require "intacct/vendor"

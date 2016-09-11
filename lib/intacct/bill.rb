@@ -47,6 +47,73 @@ module Intacct
       successful?
     end
 
+    def get_list(options = {})
+      # return false unless object.intacct_system_id.present?
+
+      #options[:fields] = [] if fields.empty?
+
+      send_xml('get_list') do |xml|
+        xml.function(controlid: "f4") {
+          xml.get_list(object: "bill", maxitems: "50", showprivate:"true") {
+            if options[:filters]
+              xml.filter {
+                options[:filters].each do |filter|
+                  xml.expression do
+                    filter.each_pair do |k,v|
+                      xml.send(k,v)
+                    end
+                  end
+                end
+              }
+            end
+            if options[:fields]
+              xml.fields {
+                fields.each do |field|
+                  xml.field field.to_s
+                end
+              }
+            end
+          }
+        }
+      end
+
+      puts response
+      if successful?
+        @data = []
+        @response.xpath('//bill').each do |invoice|
+          @data << Invoice.new({
+            id: invoice.at("key").content,
+            vendor_id: invoice.at("vendorid").content,
+            bill_number: invoice.at("billno").content,
+            state: invoice.at("state").content,
+            date_posted: get_date_at('dateposted', invoice),
+            date_due: get_date_at('datedue', invoice),
+            date_paid: get_date_at('datepaid', invoice),
+            total: invoice.at("totalamount").content,
+            total_paid: invoice.at("totalpaid").content,
+            total_due: invoice.at("totaldue").content,
+            termname: invoice.at("termname").content,
+            description: invoice.at("description").content,
+            modified_at: invoice.at("whenmodified").content
+          })
+        end
+        @data
+      else
+        false
+      end
+    end
+
+    def get_date_at(xpath, object)
+      year = object.at("#{xpath}/year").content
+      month = object.at("#{xpath}/month").content
+      day = object.at("#{xpath}/day").content
+      if [year,month,day].any?(&:empty?)
+        nil
+      else
+        Date.new(year.to_i,month.to_i,day.to_i)
+      end
+    end
+
     def intacct_object_id
       "#{intacct_bill_prefix}#{object.payment.id}"
     end
@@ -74,10 +141,6 @@ module Intacct
 
     def set_intacct_system_id
       object.payment.intacct_system_id = intacct_object_id
-    end
-
-    def set_intacct_key key
-      object.payment.intacct_key = key
     end
 
     def delete_intacct_system_id

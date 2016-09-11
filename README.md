@@ -18,7 +18,11 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+
+get_list
+Example
+to filter for vendorid = 'V100'
+client.get_list(filters: [{field: 'vendorid', operator: '=', value: "V100"}])
 
 ## Contributing
 

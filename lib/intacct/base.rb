@@ -49,6 +49,7 @@ module Intacct
       end
 
       xml = builder.doc.root.to_xml
+      puts xml
       @sent_xml = xml
 
       url = "https://www.intacct.com/ia/xml/xmlgw.phtml"
@@ -64,7 +65,7 @@ module Intacct
 
         if intacct_action
           run_hook :after_send_xml, intacct_action
-          run_hook :"after_#{intacct_action}"
+          #run_hook :"after_#{intacct_action}"
         end
       else
         run_hook :on_error
