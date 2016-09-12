@@ -32,7 +32,8 @@ module Intacct
     def get_list(options = {})
       send_xml('get_list') do |xml|
         xml.function(controlid: "f4") {
-          xml.get_list(object: "bill", maxitems: "50", showprivate:"true") {
+          xml.get_list(object: "bill", maxitems: (options[:max_items] || 0),
+            start: (options[:start] || 0), showprivate:"true") {
             if options[:filters]
               xml.filter {
                 options[:filters].each do |filter|
@@ -59,7 +60,7 @@ module Intacct
       if successful?
         @data = []
         @response.xpath('//bill').each do |invoice|
-          @data << Invoice.new({
+          @data << OpenStruct.new({
             id: invoice.at("key").content,
             vendor_id: invoice.at("vendorid").content,
             bill_number: invoice.at("billno").content,
@@ -97,7 +98,8 @@ module Intacct
     end
 
     def ap_payment_xml xml
-      xml.bankaccountid object.bank_account_id
+      xml.bankaccountid object.bank_account_id if object.bank_account_id
+      xml.chargecardid object.charge_card_id if object.charge_card_id
       xml.vendorid object.vendor_id
       xml.paymentmethod object.payment_method
       xml.paymentdate {

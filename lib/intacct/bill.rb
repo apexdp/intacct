@@ -50,7 +50,8 @@ module Intacct
     def get_list(options = {})
       send_xml('get_list') do |xml|
         xml.function(controlid: "f4") {
-          xml.get_list(object: "bill", maxitems: "50", showprivate:"true") {
+          xml.get_list(object: "bill", maxitems: (options[:max_items] || 0),
+            start: (options[:start] || 0), showprivate:"true") {
             if options[:filters]
               xml.filter {
                 options[:filters].each do |filter|
@@ -73,14 +74,14 @@ module Intacct
         }
       end
 
-      puts response
       if successful?
         @data = []
         @response.xpath('//bill').each do |invoice|
-          @data << Invoice.new({
+          @data << OpenStruct.new({
             id: invoice.at("key").content,
             vendor_id: invoice.at("vendorid").content,
             bill_number: invoice.at("billno").content,
+            po_number: invoice.at("ponumber").content,
             state: invoice.at("state").content,
             date_posted: get_date_at('dateposted', invoice),
             date_due: get_date_at('datedue', invoice),
