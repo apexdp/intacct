@@ -1,5 +1,5 @@
-module Intacct
-  class Vendor < Intacct::Base
+module IntacctRB
+  class Vendor < IntacctRB::Base
     def create
       send_xml('create') do |xml|
         xml.function(controlid: "1") {
@@ -39,6 +39,51 @@ module Intacct
       end
 
       successful?
+    end
+
+    def get_list(options = {})
+      send_xml('get_list') do |xml|
+        xml.function(controlid: "f4") {
+          xml.get_list(object: "vendor", maxitems: (options[:max_items] || 0),
+            start: (options[:start] || 0), showprivate:"true") {
+            if options[:filters]
+              xml.filter {
+                options[:filters].each do |filter|
+                  xml.expression do
+                    filter.each_pair do |k,v|
+                      xml.send(k,v)
+                    end
+                  end
+                end
+              }
+            end
+            if options[:fields]
+              xml.fields {
+                fields.each do |field|
+                  xml.field field.to_s
+                end
+              }
+            end
+          }
+        }
+      end
+
+      if successful?
+        @data = []
+        @response.xpath('//vendor').each do |invoice|
+          @data << OpenStruct.new({
+            id: invoice.at("vendorid").content,
+            name: invoice.at("name").content,
+            tax_id: invoice.at("taxid").content,
+            total_due: invoice.at("totaldue").content,
+            billing_type: invoice.at("billingtype").content,
+            vendor_account_number: invoice.at("vendoraccountno").content
+          })
+        end
+        @data
+      else
+        false
+      end
     end
 
     def intacct_object_id

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    intacct (0.0.2)
+    intacctrb (0.1)
       hooks
       nokogiri
 
@@ -103,7 +103,7 @@ DEPENDENCIES
   bundler (~> 1.3)
   dotenv-rails
   faker (>= 1.2.0)
-  intacct!
+  intacctrb!
   pry
   rake
   rspec

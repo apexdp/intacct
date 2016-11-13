@@ -1,16 +1,16 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'intacct/version'
+require 'intacctrb/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "intacct"
-  spec.version       = Intacct::VERSION
-  spec.authors       = ["CJ Lazell"]
-  spec.email         = ["cjlazell@gmail.com"]
-  spec.description   = %q{Ruby lib to communicate with the Intacct API system.}
+  spec.name          = "intacctrb"
+  spec.version       = IntacctRB::VERSION
+  spec.authors       = ["Matt Hale"]
+  spec.email         = ["matt.hale.0@gmail.com"]
+  spec.description   = %q{Ruby lib to communicate with the Intacct API system. Forked from https://github.com/cj/intacct.}
   spec.summary       = %q{Ruby Intacct API Client}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/apexdp/intacctrb"
   # spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)

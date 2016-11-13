@@ -99,7 +99,7 @@ module Helpers
   end
 
   def default_setup
-    Intacct.setup do |config|
+    IntacctRB.setup do |config|
       config.invoice_prefix  = 'AUTO-'
       config.bill_prefix     = 'AUTO-'
       config.customer_prefix = 'C'

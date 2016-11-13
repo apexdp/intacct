@@ -1,14 +1,15 @@
-require "intacct/version"
+require "intacctrb/version"
 require 'net/http'
 require 'nokogiri'
 require 'hooks'
 require 'ostruct'
-require "intacct/base"
-require "intacct/customer"
-require "intacct/vendor"
-require "intacct/invoice"
-require "intacct/bill"
-require "intacct/ap_payment"
+require "intacctrb/base"
+require "intacctrb/customer"
+require "intacctrb/journal_entry"
+require "intacctrb/vendor"
+require "intacctrb/invoice"
+require "intacctrb/bill"
+require "intacctrb/ap_payment"
 
 class Object
   def blank?
@@ -20,7 +21,7 @@ class Object
   end
 end
 
-module Intacct
+module IntacctRB
   extend self
 
   attr_accessor :xml_sender_id  , :xml_password    ,

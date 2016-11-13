@@ -1,6 +1,11 @@
-# Intacct
+# IntacctRB
 
-TODO: Write a gem description
+This is a WIP fork of the Intacct API client at https://github.com/cj/intacct.
+Goal is to create a full-featured API wrapper for Intacct.
+
+## Status
+Alpha; forked and added the features I needed *right now*. Plan to spend some time
+refactoring and testing, but not sure when that will be.
 
 ## Installation
 
@@ -17,7 +22,6 @@ Or install it yourself as:
     $ gem install intacct
 
 ## Usage
-
 
 get_list
 Example

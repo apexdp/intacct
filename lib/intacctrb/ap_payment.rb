@@ -1,11 +1,10 @@
-module Intacct
-  class APPayment < Intacct::Base
+module IntacctRB
+  class APPayment < IntacctRB::Base
     attr_accessor :customer_data
     define_hook :custom_bill_fields, :bill_item_fields
 
     def create
       return false if object.intacct_system_id.present?
-
       send_xml('create') do |xml|
         xml.function(controlid: "f1") {
           xml.send("create_paymentrequest") {
@@ -17,12 +16,18 @@ module Intacct
       successful?
     end
 
-    def delete
-      return false unless object.payment.intacct_system_id.present?
+    def reverse
+      return false unless object.id.present?
 
       send_xml('delete') do |xml|
         xml.function(controlid: "1") {
-          xml.delete_bill(externalkey: "false", key: object.payment.intacct_key)
+          xml.reverse_appayment(key: object.id) do |xml|
+              xml.datereversed do |xml|
+                xml.year object.date.year
+                xml.month object.date.month
+                xml.day object.date.day
+              end
+          end
         }
       end
 
@@ -32,14 +37,27 @@ module Intacct
     def get_list(options = {})
       send_xml('get_list') do |xml|
         xml.function(controlid: "f4") {
-          xml.get_list(object: "bill", maxitems: (options[:max_items] || 0),
+          xml.get_list(object: "appayment", maxitems: (options[:max_items] || 0),
             start: (options[:start] || 0), showprivate:"true") {
             if options[:filters]
               xml.filter {
-                options[:filters].each do |filter|
-                  xml.expression do
-                    filter.each_pair do |k,v|
-                      xml.send(k,v)
+                xml.logical(logical_operator: "and") do
+                  options[:filters][:and_filters].each do |filter|
+                    xml.expression do
+                      filter.each_pair do |k,v|
+                        xml.send(k,v)
+                      end
+                    end
+                  end
+                  if options[:filters][:or_filters]
+                    xml.logical(logical_operator: "or") do
+                      options[:filters][:or_filters].each do |filter|
+                        xml.expression do
+                          filter.each_pair do |k,v|
+                            xml.send(k,v)
+                          end
+                        end
+                      end
                     end
                   end
                 end
@@ -59,22 +77,33 @@ module Intacct
       puts response
       if successful?
         @data = []
-        @response.xpath('//bill').each do |invoice|
-          @data << OpenStruct.new({
-            id: invoice.at("key").content,
-            vendor_id: invoice.at("vendorid").content,
-            bill_number: invoice.at("billno").content,
-            state: invoice.at("state").content,
-            date_posted: get_date_at('dateposted', invoice),
-            date_due: get_date_at('datedue', invoice),
-            date_paid: get_date_at('datepaid', invoice),
-            total: invoice.at("totalamount").content,
-            total_paid: invoice.at("totalpaid").content,
-            total_due: invoice.at("totaldue").content,
-            termname: invoice.at("termname").content,
-            description: invoice.at("description").content,
-            modified_at: invoice.at("whenmodified").content
+        @response.xpath('//appayment').each do |payment|
+          item = OpenStruct.new({
+            id: payment.at("key").content,
+            vendor_id: payment.at("vendorid").content,
+            payment_amount: payment.at("paymentamount").content,
+            payment_trx_amount: payment.at("paymenttrxamount").content,
+            payment_method: payment.at("paymentmethod").content,
+            payment_account_id: payment.at("financialentity").content,
+            state: payment.at("transactionstate").content,
+            date: get_date_at('paymentdate', payment),
+            date_cleared: get_date_at('cleareddate', payment),
+            cleared: payment.at("cleared").content,
           })
+          payment.xpath('.//appaymentitem').each do |payment_item|
+            item[:payment_items] ||= []
+            item[:payment_items] << {
+              bill_id: payment_item.at('billkey').content,
+              line_item_id: payment_item.at('lineitemkey').content,
+              gl_account_number: payment_item.at('glaccountno').content,
+              amount: payment_item.at('amount').content,
+              department_id: payment_item.at('departmentid').content,
+              location_id: payment_item.at('locationid').content,
+              trx_amount: payment_item.at('trx_amount').content,
+              currency: payment_item.at('currency').content
+            }
+          end
+          @data << item
         end
         @data
       else

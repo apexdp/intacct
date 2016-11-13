@@ -1,5 +1,5 @@
-module Intacct
-  class Invoice < Intacct::Base
+module IntacctRB
+  class Invoice < IntacctRB::Base
     attr_accessor :customer_data
     define_hook :custom_invoice_fields
 

@@ -1,5 +1,5 @@
-module Intacct
-  class Bill < Intacct::Base
+module IntacctRB
+  class Bill < IntacctRB::Base
     attr_accessor :customer_data
     define_hook :custom_bill_fields, :bill_item_fields
 
@@ -36,11 +36,11 @@ module Intacct
     end
 
     def delete
-      return false unless object.payment.intacct_system_id.present?
+      # return false unless object.payment.intacct_system_id.present?
 
       send_xml('delete') do |xml|
         xml.function(controlid: "1") {
-          xml.delete_bill(externalkey: "false", key: object.payment.intacct_key)
+          xml.delete_bill(externalkey: "false", key: object.intacct_key)
         }
       end
 

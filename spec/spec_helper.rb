@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'bundler/setup'
 # our gem
-require 'intacct'
+require 'intacctrb'
 require 'dotenv'
 require "faker"
 require "pry"

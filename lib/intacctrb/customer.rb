@@ -1,5 +1,5 @@
-module Intacct
-  class Customer < Intacct::Base
+module IntacctRB
+  class Customer < IntacctRB::Base
     def create
       send_xml('create') do |xml|
         xml.function(controlid: "1") {

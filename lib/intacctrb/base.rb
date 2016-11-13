@@ -1,4 +1,4 @@
-module Intacct
+module IntacctRB
   class Base < Struct.new(:object, :current_user)
     include Hooks
     include Hooks::InstanceHooks
@@ -27,8 +27,8 @@ module Intacct
       builder = Nokogiri::XML::Builder.new do |xml|
         xml.request {
           xml.control {
-            xml.senderid Intacct.xml_sender_id
-            xml.password Intacct.xml_password
+            xml.senderid IntacctRB.xml_sender_id
+            xml.password IntacctRB.xml_password
             xml.controlid "INVOICE XML"
             xml.uniqueid "false"
             xml.dtdversion "2.1"
@@ -36,9 +36,9 @@ module Intacct
           xml.operation(transaction: "false") {
             xml.authentication {
               xml.login {
-                xml.userid Intacct.app_user_id
-                xml.companyid Intacct.app_company_id
-                xml.password Intacct.app_password
+                xml.userid IntacctRB.app_user_id
+                xml.companyid IntacctRB.app_company_id
+                xml.password IntacctRB.app_password
               }
             }
             xml.content {
@@ -57,7 +57,7 @@ module Intacct
 
       res = Net::HTTP.post_form(uri, 'xmlrequest' => xml)
       @response = Nokogiri::XML(res.body)
-
+      puts res.body
       if successful?
         if key = response.at('//result//key')
           set_intacct_key key.content
