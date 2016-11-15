@@ -2,11 +2,28 @@ module IntacctRB
   class JournalEntry < IntacctRB::Base
 
     def create
-      return false if object.intacct_system_id.present?
+      return false if object.intacct_id.present?
       send_xml('create') do |xml|
         xml.function(controlid: "f1") {
-          xml.send("create_gltransaction") {
-            je_xml xml
+          xml.send("create") {
+            xml.glbatch {
+              je_xml xml
+            }
+          }
+        }
+      end
+
+      successful?
+    end
+
+    def update
+      return false unless object.intacct_id.present?
+      send_xml('update') do |xml|
+        xml.function(controlid: "f1") {
+          xml.send("update") {
+            xml.glbatch {
+              je_xml xml
+            }
           }
         }
       end
@@ -26,21 +43,12 @@ module IntacctRB
     end
 
     def get_list(options = {})
-      send_xml('get_list') do |xml|
+      send_xml('readByQuery') do |xml|
         xml.function(controlid: "f4") {
-          xml.get_list(object: "gltransaction", maxitems: (options[:max_items] || 0),
-            start: (options[:start] || 0), showprivate:"true") {
-            if options[:filters]
-              xml.filter {
-                options[:filters].each do |filter|
-                  xml.expression do
-                    filter.each_pair do |k,v|
-                      xml.send(k,v)
-                    end
-                  end
-                end
-              }
-            end
+          xml.readByQuery {
+            xml.object "glbatch"
+            xml.pagesize (options[:max_items] || 0)
+            xml.query options[:filter]
             if options[:fields]
               xml.fields {
                 fields.each do |field|
@@ -54,21 +62,81 @@ module IntacctRB
 
       if successful?
         @data = []
-        @response.xpath('//bill').each do |invoice|
+        @response.xpath('//glbatch').each do |invoice|
           @data << OpenStruct.new({
-            id: invoice.at("key").content,
-            batch_number: invoice.at("batchno").content,
-            journal_id: invoice.at("journalid").content,
-            date_created: get_date_at('datecreated', invoice),
-            date_modified: get_date_at('datemodified', invoice),
+            id: invoice.at("RECORDNO").content,
+            batch_number: invoice.at("BATCHNO").content,
+            journal_id: invoice.at("JOURNAL").content,
+            date: Date.strptime(invoice.at("BATCH_DATE").content,'%m/%d/%Y'),
+            modified_at: DateTime.strptime(invoice.at("MODIFIED").content, '%m/%d/%Y %H:%H:%S'),
             description: invoice.at("description").content,
-            state: invoice.at("state").content
+            state: invoice.at("STATE").content
           })
         end
         @data
       else
         false
       end
+    end
+
+    def get(options = {})
+      send_xml('read') do |xml|
+        xml.function(controlid: "f4") {
+          xml.read {
+            xml.object "glbatch"
+            xml.keys object.intacct_id || options[:intact_id]
+            if options[:fields]
+              xml.fields {
+                fields.each do |field|
+                  xml.field field.to_s
+                end
+              }
+            end
+          }
+        }
+      end
+
+      if successful?
+        @data = []
+        @response.xpath('//glbatch').each do |je|
+          @data << OpenStruct.new({
+            id: je.at("RECORDNO").content,
+            batch_number: je.at("BATCHNO").content,
+            journal_id: je.at("JOURNAL").content,
+            date: Date.strptime(je.at("BATCH_DATE").content,'%Y-%m-%d'),
+            modified_at: DateTime.strptime(je.at("WHENMODIFIED").content, '%Y-%m-%dT%H:%M:%S'),
+            description: je.at("BATCH_TITLE").content,
+            state: je.at("STATE").content,
+            rows: get_rows(je)
+          })
+        end
+        if @data.empty?
+          false
+        else
+          @data
+        end
+      else
+        false
+      end
+    end
+
+    def get_rows(je)
+      rows = []
+      je.xpath('//glentry').each do |row|
+        rows << {
+          type: row.at('TR_TYPE').content,
+          amount: row.at('AMOUNT').content,
+          account_number: (row.at('ACCOUNTNO') ? row.at('ACCOUNTNO').content : nil),
+          memo: (row.at('DESCRIPTION') ? row.at('DESCRIPTION').content : nil),
+          location_id: (row.at('LOCATION') ? row.at('LOCATION').content : nil),
+          department_id: (row.at('DEPARTMENT') ? row.at('DEPARTMENT').content : nil),
+          customer_id: (row.at('CUSTOMER') ? row.at('CUSTOMER').content : nil),
+          employee_id: (row.at('EMPLOYEE') ? row.at('EMPLOYEE').content : nil),
+          project_id: (row.at('PROJECT') ? row.at('PROJECT').content : nil),
+          item_id: (row.at('ITEM') ? row.at('ITEM').content : nil)
+        }
+      end
+      rows
     end
 
     def get_date_at(xpath, object)
@@ -83,83 +151,38 @@ module IntacctRB
     end
 
     def intacct_object_id
-      "#{intacct_bill_prefix}#{object.payment.id}"
+      object.intacct_key
     end
 
     def je_xml xml
-      xml.journalid object.journal_id
-      if object.date
-        xml.datecreated {
-          xml.year object.date.strftime("%Y")
-          xml.month object.date.strftime("%m")
-          xml.day object.date.strftime("%d")
-        }
-      end
-      if object.reverse_date
-        xml.reversedate {
-          xml.year object.reverse_date.strftime("%Y")
-          xml.month object.reverse_date.strftime("%m")
-          xml.day object.reverse_date.strftime("%d")
-        }
-      end
-      xml.description object.description
+      xml.recordno object.intacct_id if object.intacct_id
+      xml.journal object.journal_id
+      xml.batch_date object.date.strftime('%Y-%m-%d') if object.date
+      xml.reverse_date object.reverse_date.strftime('%Y-%m-%d') if object.reverse_date
+      xml.batch_title object.description
       xml.referenceno object.reference_number
       je_item_fields(xml)
     end
 
-    def set_intacct_system_id
-      object.payment.intacct_system_id = intacct_object_id
-    end
-
-    def delete_intacct_system_id
-      object.payment.intacct_system_id = nil
-    end
-
-    def delete_intacct_key
-      object.payment.intacct_key = nil
-    end
-
-    def set_date_time type
-      if %w(create update delete).include? type
-        if object.payment.respond_to? :"intacct_#{type}d_at"
-          object.payment.send("intacct_#{type}d_at=", DateTime.now)
-        end
-      end
-    end
-
     def je_item_fields xml
-      puts "object:: #{object}"
-      xml.gltransactionentries {
+      xml.entries {
         object.rows.each do |row|
           xml.glentry {
-            xml.trtype row[:type]
+            puts "row[:specialty_id]: #{row[:specialty_id]}"
+            xml.tr_type row[:type]
             xml.amount row[:amount]
-            xml.glaccountno row[:account_number]
-            if row[:date]
-              xml.datecreated {
-                xml.year row[:date].strftime("%Y")
-                xml.month row[:date].strftime("%m")
-                xml.day row[:date].strftime("%d")
-              }
-            end
-            xml.memo row[:memo]
-            xml.locationid row[:location_id] if row[:location_id]
-            xml.departmentid row[:department_id] if row[:department_id]
-            xml.customerid row[:customer_id] if row[:customer_id]
-            xml.employeeid row[:employee_id] if row[:employee_id]
-            xml.projectid row[:project_id] if row[:project_id]
-            xml.itemid row[:item_id] if row[:itemid]
-            xml.classid row[:class_id] if row[:class_id]
+            xml.accountno row[:account_number]
+            xml.description row[:memo]
+            xml.location row[:location_id] if row[:location_id]
+            xml.department row[:department_id] if row[:department_id]
+            xml.customer row[:customer_id] if row[:customer_id]
+            xml.employee row[:employee_id] if row[:employee_id]
+            xml.project row[:project_id] if row[:project_id]
+            xml.specialty row[:specialty_id] if row[:specialty_id]
+            xml.item row[:item_id] if row[:itemid]
+            xml.class row[:class_id] if row[:class_id]
           }
         end
-      }
-    end
-
-    def to_date_xml xml, field_name, date
-      xml.send(field_name) {
-        xml.year date.strftime("%Y")
-        xml.month date.strftime("%m")
-        xml.day date.strftime("%d")
       }
     end
   end

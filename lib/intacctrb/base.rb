@@ -31,7 +31,7 @@ module IntacctRB
             xml.password IntacctRB.xml_password
             xml.controlid "INVOICE XML"
             xml.uniqueid "false"
-            xml.dtdversion "2.1"
+            xml.dtdversion "3.0"
           }
           xml.operation(transaction: "false") {
             xml.authentication {
@@ -59,8 +59,8 @@ module IntacctRB
       @response = Nokogiri::XML(res.body)
       puts res.body
       if successful?
-        if key = response.at('//result//key')
-          set_intacct_key key.content
+        if key = response.at('//result//recordno')
+          set_intacct_id key.content if object
         end
 
         if intacct_action
@@ -82,30 +82,18 @@ module IntacctRB
       end
     end
 
-    %w(invoice bill vendor customer).each do |type|
+    %w(invoice bill vendor customer journal_entry).each do |type|
       define_method "intacct_#{type}_prefix" do
-        Intacct.send("#{type}_prefix")
+        IntacctRB.send("#{type}_prefix")
       end
     end
 
-    def intacct_system_id
-      intacct_object_id
+    def set_intacct_id id
+      object.intacct_id = id
     end
 
-    def set_intacct_system_id
-      object.intacct_system_id = intacct_object_id
-    end
-
-    def delete_intacct_system_id
-      object.intacct_system_id = nil
-    end
-
-    def set_intacct_key key
-      object.intacct_key = key if object.respond_to? :intacct_key
-    end
-
-    def delete_intacct_key
-      object.intacct_key = nil if object.respond_to? :intacct_key
+    def delete_intacct_id
+      object.intacct_id = nil if object.respond_to? :intacct_id
     end
 
     def set_date_time type
