@@ -31,16 +31,16 @@ module IntacctRB
       successful?
     end
 
-    def delete
-      # return false unless object.payment.intacct_system_id.present?
-      send_xml('delete') do |xml|
-        xml.function(controlid: "1") {
-          xml.delete_bill(externalkey: "false", key: object.intacct_key)
-        }
-      end
-
-      successful?
-    end
+    # def delete
+    #   # return false unless object.payment.intacct_system_id.present?
+    #   send_xml('delete') do |xml|
+    #     xml.function(controlid: "1") {
+    #       xml.delete_bill(externalkey: "false", key: object.intacct_key)
+    #     }
+    #   end
+    #
+    #   successful?
+    # end
 
     def get_list(options = {})
       send_xml('readByQuery') do |xml|
@@ -84,7 +84,7 @@ module IntacctRB
         xml.function(controlid: "f4") {
           xml.read {
             xml.object "glbatch"
-            xml.keys object.intacct_id || options[:intact_id]
+            xml.keys object.try(:intacct_id) || options[:intacct_id]
             if options[:fields]
               xml.fields {
                 fields.each do |field|
@@ -168,7 +168,6 @@ module IntacctRB
       xml.entries {
         object.rows.each do |row|
           xml.glentry {
-            puts "row[:specialty_id]: #{row[:specialty_id]}"
             xml.tr_type row[:type]
             xml.amount row[:amount]
             xml.accountno row[:account_number]
@@ -178,12 +177,12 @@ module IntacctRB
             xml.customer row[:customer_id] if row[:customer_id]
             xml.employee row[:employee_id] if row[:employee_id]
             xml.project row[:project_id] if row[:project_id]
-            xml.specialty row[:specialty_id] if row[:specialty_id]
             xml.item row[:item_id] if row[:itemid]
-            xml.class row[:class_id] if row[:class_id]
+            xml.classid row[:class_id] if row[:class_id]
           }
         end
       }
     end
+
   end
 end

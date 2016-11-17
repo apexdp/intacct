@@ -6,8 +6,8 @@ module IntacctRB
     define_hook :after_create, :after_update, :after_delete,
       :after_get, :after_send_xml, :on_error, :before_create
 
-    after_create :set_intacct_system_id
-    after_delete :delete_intacct_system_id
+    after_create :set_intacct_id
+    after_delete :delete_intacct_id
     after_delete :delete_intacct_key
     after_send_xml :set_date_time
 
@@ -15,7 +15,12 @@ module IntacctRB
 
     def initialize *params
       params[0] = OpenStruct.new(params[0]) if params[0].is_a? Hash
+      params[0] ||= OpenStruct.new()
       super(*params)
+    end
+
+    def intacct_id
+      object.intacct_id
     end
 
     private
@@ -59,7 +64,7 @@ module IntacctRB
       @response = Nokogiri::XML(res.body)
       puts res.body
       if successful?
-        if key = response.at('//result//recordno')
+        if key = response.at('//result//RECORDNO')
           set_intacct_id key.content if object
         end
 
