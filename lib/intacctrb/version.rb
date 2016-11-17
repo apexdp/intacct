@@ -1,3 +1,3 @@
 module IntacctRB
-  VERSION = "0.2pre"
+  VERSION = "0.2.1pre"
 end
