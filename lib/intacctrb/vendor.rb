@@ -70,14 +70,14 @@ module IntacctRB
 
       if successful?
         @data = []
-        @response.xpath('//vendor').each do |invoice|
+        @response.xpath('//vendor').each do |vendor|
           @data << OpenStruct.new({
-            id: invoice.at("vendorid").content,
-            name: invoice.at("name").content,
-            tax_id: invoice.at("taxid").content,
-            total_due: invoice.at("totaldue").content,
-            billing_type: invoice.at("billingtype").content,
-            vendor_account_number: invoice.at("vendoraccountno").content
+            id: vendor.at("vendorid").content,
+            name: vendor.at("name").content,
+            tax_id: vendor.at("taxid").content,
+            total_due: vendor.at("totaldue").content,
+            billing_type: vendor.at("billingtype").content,
+            vendor_account_number: vendor.at("vendoraccountno").content
           })
         end
         @data

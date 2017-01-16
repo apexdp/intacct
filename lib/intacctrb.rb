@@ -10,6 +10,7 @@ require "intacctrb/vendor"
 require "intacctrb/invoice"
 require "intacctrb/bill"
 require "intacctrb/ap_payment"
+require "intacctrb/account"
 
 class Object
   def blank?

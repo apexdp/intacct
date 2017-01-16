@@ -14,7 +14,10 @@ module IntacctRB
     attr_accessor :response, :data, :sent_xml, :intacct_action
 
     def initialize *params
-      params[0] = OpenStruct.new(params[0]) if params[0].is_a? Hash
+      if params[0].is_a? Hash
+        json_data = params[0].to_json
+        params[0] = JSON.parse(json_data, object_class: OpenStruct)
+      end
       params[0] ||= OpenStruct.new()
       super(*params)
     end
