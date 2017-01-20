@@ -111,5 +111,25 @@ module IntacctRB
         end
       end
     end
+
+    def filter_xml(xml, options)
+      if options[:filters]
+        xml.filter {
+          options[:filters].each do |filter|
+            xml.expression do
+              xml.field(filter[:field])
+              xml.operator(filter[:operator] || '=')
+              xml.value(filter[:value])
+            end
+          end
+        }
+      end
+    end
+
+    def date_xml(xml, date)
+      xml.year date.to_date.strftime("%Y")
+      xml.month date.to_date.strftime("%m")
+      xml.day date.to_date.strftime("%d")
+    end
   end
 end

@@ -19,6 +19,22 @@ module IntacctRB
       successful?
     end
 
+    def update
+      raise 'You must pass an id to update a bill' unless object.intacct_id.present?
+
+      send_xml('update') do |xml|
+        xml.function(controlid: "f1") {
+          xml.update {
+            xml.apbill(key: object.intacct_id) {
+              bill_xml xml
+            }
+          }
+        }
+      end
+
+      successful?
+    end
+
     def delete
       # return false unless object.intacct_system_id.present?
 
@@ -100,12 +116,12 @@ module IntacctRB
     end
 
     def bill_xml xml
+      xml.recordno object.intacct_id
       xml.vendorid object.vendor_id
-      xml.whencreated object.created_at
-      xml.whenposted object.created_at
-      xml.whendue object.paid_at
+      xml.whenposted object.posted_at
+      xml.whencreated object.invoice_date
+      xml.whendue object.due_date
       xml.action object.action
-      xml.docnumber object.external_id
       xml.recordid object.record_id
 
       xml.apbillitems {
@@ -114,6 +130,8 @@ module IntacctRB
             xml.accountno line_item.account_number
             xml.amount line_item.amount
             xml.entrydescription line_item.memo
+            xml.locationid line_item.location_id
+            xml.projectid line_item.provider_id
           }
         end
       }

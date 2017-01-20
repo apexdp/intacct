@@ -46,17 +46,7 @@ module IntacctRB
         xml.function(controlid: "f4") {
           xml.get_list(object: "vendor", maxitems: (options[:max_items] || 0),
             start: (options[:start] || 0), showprivate:"true") {
-            if options[:filters]
-              xml.filter {
-                options[:filters].each do |filter|
-                  xml.expression do
-                    filter.each_pair do |k,v|
-                      xml.send(k,v)
-                    end
-                  end
-                end
-              }
-            end
+            filter_xml(xml, options)
             if options[:fields]
               xml.fields {
                 fields.each do |field|
