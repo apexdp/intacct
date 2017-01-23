@@ -10,7 +10,11 @@ module IntacctRB
         }
       end
 
-      successful?
+      if !successful?
+        raise(response.at('//error//description2'));
+      end
+
+      true
     end
 
     def update updated_vendor = false
@@ -87,9 +91,11 @@ module IntacctRB
       xml.taxid object.tax_id
       xml.billingtype "balanceforward"
       xml.status "active"
+      xml.vendoraccountno object.vendor_account_number
+      xml.paymethod object.payment_method
       xml.contactinfo {
         xml.contact {
-          xml.contactname "#{object.last_name}, #{object.first_name} (#{object.id})"
+          xml.contactname object.contact_name
           xml.printas object.full_name
           xml.companyname object.company_name
           xml.firstname object.first_name
