@@ -2,19 +2,21 @@ module IntacctRB
   class Vendor < IntacctRB::Base
     def create
       send_xml('create') do |xml|
-        xml.function(controlid: "1") {
-          xml.create_vendor {
-            xml.vendorid intacct_object_id
-            vendor_xml xml
+        xml.function(controlid: "f1") {
+          xml.create {
+            xml.vendor {
+              vendor_xml xml
+            }
           }
         }
       end
 
       if !successful?
-        raise(response.at('//error//description2'));
+        raise(response.at('//error//description2'))
       end
 
-      true
+      new_vendor = response.xpath('//result//data//vendor').first
+      new_vendor.at('VENDORID').content
     end
 
     def update updated_vendor = false
@@ -87,32 +89,30 @@ module IntacctRB
     def vendor_xml xml
       xml.name "#{object.company_name.present? ? object.company_name : object.full_name}"
       #[todo] - Custom
-      xml.vendtype "Appraiser"
+      # xml.vendtype "Appraiser"
       xml.taxid object.tax_id
       xml.billingtype "balanceforward"
       xml.status "active"
       xml.vendoraccountno object.vendor_account_number
-      xml.paymethod object.payment_method
-      xml.contactinfo {
-        xml.contact {
-          xml.contactname object.contact_name
-          xml.printas object.full_name
-          xml.companyname object.company_name
-          xml.firstname object.first_name
-          xml.lastname object.last_name
-          xml.phone1 object.business_phone
-          xml.cellphone object.cell_phone
-          xml.email1 object.email
-          if object.billing_address.present?
-            xml.mailaddress {
-              xml.address1 object.billing_address.address1
-              xml.address2 object.billing_address.address2
-              xml.city object.billing_address.city
-              xml.state object.billing_address.state
-              xml.zip object.billing_address.zipcode
-            }
-          end
-        }
+      xml.paymethodkey object.payment_method
+      xml.displaycontact {
+        xml.contactname object.company_name
+        xml.printas object.company_name
+        xml.companyname object.company_name
+        xml.firstname object.first_name
+        xml.lastname object.last_name
+        xml.phone1 object.business_phone
+        xml.cellphone object.cell_phone
+        xml.email1 object.email
+        if object.billing_address.present?
+          xml.mailaddress {
+            xml.address1 object.billing_address.address1
+            xml.address2 object.billing_address.address2
+            xml.city object.billing_address.city
+            xml.state object.billing_address.state
+            xml.zip object.billing_address.zipcode
+          }
+        end
       }
       if object.ach_routing_number.present?
         xml.achenabled "#{object.ach_routing_number.present? ? "true" : "false"}"
