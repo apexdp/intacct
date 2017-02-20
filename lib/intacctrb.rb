@@ -11,6 +11,10 @@ require "intacctrb/invoice"
 require "intacctrb/bill"
 require "intacctrb/ap_payment"
 require "intacctrb/account"
+require "intacctrb/attachment"
+
+require "intacctrb/exceptions/base"
+require "intacctrb/exceptions/error"
 
 class Object
   def blank?

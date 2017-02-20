@@ -95,6 +95,7 @@ module IntacctRB
       xml.status "active"
       xml.vendoraccountno object.vendor_account_number
       xml.paymethodkey object.payment_method
+      xml.onetime object.one_time || false
       xml.displaycontact {
         xml.contactname object.company_name
         xml.printas object.company_name

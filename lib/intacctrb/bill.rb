@@ -16,7 +16,11 @@ module IntacctRB
         }
       end
 
-      successful?
+      if !successful?
+        raise IntacctRB::Exceptions::Error.new(response.at('//error//description2'))
+      end
+
+      object.intacct_id
     end
 
     def update
@@ -32,7 +36,11 @@ module IntacctRB
         }
       end
 
-      successful?
+      if !successful?
+        raise(response.at('//error//description2'))
+      end
+
+      object.intacct_id
     end
 
     def delete
@@ -123,6 +131,7 @@ module IntacctRB
       xml.whendue object.due_date
       xml.action object.action
       xml.recordid object.record_id
+      xml.supdocid object.supdoc_id
 
       xml.apbillitems {
         object.line_items.each do |line_item|
