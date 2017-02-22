@@ -157,8 +157,8 @@ module IntacctRB
     def je_xml xml
       xml.recordno object.intacct_id if object.intacct_id
       xml.journal object.journal_id
-      xml.batch_date object.date.strftime('%Y-%m-%d') if object.date
-      xml.reverse_date object.reverse_date.strftime('%Y-%m-%d') if object.reverse_date
+      xml.batch_date (object.date.try(:strftime, '%Y-%m-%d')) if object.date
+      xml.reverse_date (object.reverse_date.try(:strftime, '%Y-%m-%d')) if object.reverse_date
       xml.batch_title object.description
       xml.referenceno object.reference_number
       je_item_fields(xml)
