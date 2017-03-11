@@ -88,8 +88,7 @@ module IntacctRB
 
     def vendor_xml xml
       xml.name "#{object.company_name.present? ? object.company_name : object.full_name}"
-      #[todo] - Custom
-      # xml.vendtype "Appraiser"
+      xml.vendtype object.vendor_type if object.vendor_type.present?
       xml.taxid object.tax_id
       xml.billingtype "balanceforward"
       xml.status "active"
