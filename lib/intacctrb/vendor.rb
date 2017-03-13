@@ -12,7 +12,7 @@ module IntacctRB
       end
 
       if !successful?
-        raise response.at('//error//description2') || "Unknown error: #{response}"
+        raise IntacctRB::Exceptions::Vendor.new(response.at('//error//description2'))
       end
 
       new_vendor = response.xpath('//result//data//vendor').first

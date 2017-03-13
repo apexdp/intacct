@@ -14,7 +14,9 @@ require "intacctrb/account"
 require "intacctrb/attachment"
 
 require "intacctrb/exceptions/base"
-require "intacctrb/exceptions/error"
+require "intacctrb/exceptions/vendor"
+require "intacctrb/exceptions/bill"
+require "intacctrb/exceptions/attachment"
 
 class Object
   def blank?

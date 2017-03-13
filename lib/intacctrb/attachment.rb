@@ -14,7 +14,11 @@ module IntacctRB
         }
       end
 
-      successful?
+      if !successful?
+        raise IntacctRB::Exceptions::Attachment.new(response.at('//error//description2'))
+      end
+
+      object.intacct_id
     end
 
     def get_date_at(xpath, object)
