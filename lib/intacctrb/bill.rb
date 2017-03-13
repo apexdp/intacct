@@ -17,7 +17,7 @@ module IntacctRB
       end
 
       if !successful?
-        raise IntacctRB::Exceptions::Error.new(response.at('//error//description2'))
+        raise IntacctRB::Exceptions::Bill.new(response.at('//error//description2'))
       end
 
       object.intacct_id
