@@ -98,7 +98,7 @@ module IntacctRB
       xml.primary {
         xml.contact {
           xml.contactname object.company_name
-          xml.printas object.company_name
+          xml.printas object.print_as
           xml.companyname object.company_name
           xml.firstname object.first_name
           xml.lastname object.last_name

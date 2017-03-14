@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    intacctrb (0.4.5)
+    intacctrb (0.4.6)
       hooks
       nokogiri
 
