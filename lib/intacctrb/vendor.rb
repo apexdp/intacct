@@ -93,26 +93,28 @@ module IntacctRB
       xml.billingtype "balanceforward"
       xml.status "active"
       xml.vendoraccountno object.vendor_account_number
-      xml.paymethodkey object.payment_method
+      xml.paymethod object.payment_method
       xml.onetime object.one_time || false
-      xml.displaycontact {
-        xml.contactname object.company_name
-        xml.printas object.company_name
-        xml.companyname object.company_name
-        xml.firstname object.first_name
-        xml.lastname object.last_name
-        xml.phone1 object.business_phone
-        xml.cellphone object.cell_phone
-        xml.email1 object.email
-        if object.billing_address.present?
-          xml.mailaddress {
-            xml.address1 object.billing_address.address1
-            xml.address2 object.billing_address.address2
-            xml.city object.billing_address.city
-            xml.state object.billing_address.state
-            xml.zip object.billing_address.zipcode
-          }
-        end
+      xml.primary {
+        xml.contact {
+          xml.contactname object.company_name
+          xml.printas object.company_name
+          xml.companyname object.company_name
+          xml.firstname object.first_name
+          xml.lastname object.last_name
+          xml.phone1 object.business_phone
+          xml.cellphone object.cell_phone
+          xml.email1 object.email
+          if object.mailing_address.present?
+            xml.mailaddress {
+              xml.address1 object.mailing_address.address_1
+              xml.address2 object.mailing_address.address_2
+              xml.city object.mailing_address.city
+              xml.state object.mailing_address.state
+              xml.zip object.mailing_address.zip
+            }
+          end
+        }
       }
       if object.ach_routing_number.present?
         xml.achenabled "#{object.ach_routing_number.present? ? "true" : "false"}"
