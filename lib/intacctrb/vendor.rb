@@ -96,25 +96,16 @@ module IntacctRB
       xml.paymethod object.payment_method
       xml.onetime object.one_time || false
       xml.primary {
-        xml.contact {
-          xml.contactname object.company_name
-          xml.printas object.print_as
-          xml.companyname object.company_name
-          xml.firstname object.first_name
-          xml.lastname object.last_name
-          xml.phone1 object.business_phone
-          xml.cellphone object.cell_phone
-          xml.email1 object.email
-          if object.mailing_address.present?
-            xml.mailaddress {
-              xml.address1 object.mailing_address.address_1
-              xml.address2 object.mailing_address.address_2
-              xml.city object.mailing_address.city
-              xml.state object.mailing_address.state
-              xml.zip object.mailing_address.zip
-            }
-          end
-        }
+        contact_xml(xml, object.primary)
+      }
+      xml.payto {
+        contact_xml(xml, object.pay_to)
+      }
+      xml.contactinfo {
+        contact_xml(xml, object.contact_info)
+      }
+      xml.returnto {
+        contact_xml(xml, object.return_to)
       }
       if object.ach_routing_number.present?
         xml.achenabled "#{object.ach_routing_number.present? ? "true" : "false"}"
@@ -123,6 +114,28 @@ module IntacctRB
         xml.achaccounttype "#{object.ach_account_type.capitalize+" Account"}"
         xml.achremittancetype "#{(object.ach_account_classification=="business" ? "CCD" : "PPD")}"
       end
+    end
+
+    def contact_xml xml, contact_object
+      xml.contact {
+        xml.contactname contact_object.contact_name
+        xml.printas contact_object.print_as
+        xml.companyname contact_object.company_name
+        xml.firstname contact_object.first_name
+        xml.lastname contact_object.last_name
+        xml.phone1 contact_object.business_phone
+        xml.cellphone contact_object.cell_phone
+        xml.email1 contact_object.email
+        if contact_object.mailing_address.present?
+          xml.mailaddress {
+            xml.address1 contact_object.mailing_address.address_1
+            xml.address2 contact_object.mailing_address.address_2
+            xml.city contact_object.mailing_address.city
+            xml.state contact_object.mailing_address.state
+            xml.zip contact_object.mailing_address.zip
+          }
+        end
+      }
     end
   end
 end
