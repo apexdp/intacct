@@ -1,5 +1,5 @@
 module IntacctRB
-  class APPayment < IntacctRB::Base
+  class APPaymentRequest < IntacctRB::Base
     attr_accessor :customer_data
     define_hook :custom_bill_fields, :bill_item_fields
 
@@ -7,7 +7,7 @@ module IntacctRB
       return false if object.intacct_system_id.present?
       send_xml('create') do |xml|
         xml.function(controlid: "f1") {
-          xml.send("create_appayment") {
+          xml.send("create_paymentrequest") {
             ap_payment_xml xml
           }
         }
@@ -130,24 +130,19 @@ module IntacctRB
       xml.bankaccountid object.bank_account_id if object.bank_account_id
       xml.chargecardid object.charge_card_id if object.charge_card_id
       xml.vendorid object.vendor_id
-      xml.memo object.memo
       xml.paymentmethod object.payment_method
-      xml.checkdate {
-        xml.year Date.parse(object.payment_date).strftime("%Y")
-        xml.month Date.parse(object.payment_date).strftime("%m")
-        xml.day Date.parse(object.payment_date).strftime("%d")
+      xml.paymentdate {
+        xml.year object.payment_date.strftime("%Y")
+        xml.month object.payment_date.strftime("%m")
+        xml.day object.payment_date.strftime("%d")
       }
-      xml.checkno object.check_number
-      xml.billno object.bill_number
-      xml.payitems {
-        object.line_items.each do |line_item|
-          xml.payitem {
-            xml.glaccountno line_item.account_number
-            xml.paymentamount line_item.amount
-            xml.locationid line_item.location_id
-          }
-        end
+      xml.paymentrequestitems {
+        xml.paymentrequestitem {
+          xml.key object.bill_key
+          xml.paymentamount object.amount
+        }
       }
+      xml.documentnumber object.check_number
     end
 
     def set_intacct_system_id
