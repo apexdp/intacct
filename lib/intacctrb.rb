@@ -17,6 +17,7 @@ require "intacctrb/exceptions/base"
 require "intacctrb/exceptions/vendor"
 require "intacctrb/exceptions/bill"
 require "intacctrb/exceptions/attachment"
+require "intacctrb/exceptions/ap_payment"
 
 class Object
   def blank?

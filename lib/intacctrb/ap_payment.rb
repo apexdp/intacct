@@ -5,6 +5,7 @@ module IntacctRB
 
     def create
       return false if object.intacct_system_id.present?
+
       send_xml('create') do |xml|
         xml.function(controlid: "f1") {
           xml.send("create_appayment") {
@@ -12,8 +13,12 @@ module IntacctRB
           }
         }
       end
-      puts response
-      successful?
+
+      if !successful?
+        raise IntacctRB::Exceptions::APPayment.new(response.at('//error//description2'))
+      end
+
+      object.intacct_id
     end
 
     def reverse
@@ -127,15 +132,16 @@ module IntacctRB
     end
 
     def ap_payment_xml xml
+      xml.key object.intacct_id if object.intacct_id
       xml.bankaccountid object.bank_account_id if object.bank_account_id
       xml.chargecardid object.charge_card_id if object.charge_card_id
       xml.vendorid object.vendor_id
       xml.memo object.memo
       xml.paymentmethod object.payment_method
       xml.checkdate {
-        xml.year Date.parse(object.payment_date).strftime("%Y")
-        xml.month Date.parse(object.payment_date).strftime("%m")
-        xml.day Date.parse(object.payment_date).strftime("%d")
+        xml.year Date.parse(object.payment_date).year
+        xml.month Date.parse(object.payment_date).month
+        xml.day Date.parse(object.payment_date).day
       }
       xml.checkno object.check_number
       xml.billno object.bill_number
