@@ -140,7 +140,7 @@ module IntacctRB
             xml.amount line_item.amount
             xml.entrydescription line_item.memo
             xml.locationid line_item.location_id
-            xml.projectid line_item.provider_id
+            xml.projectid line_item.project_id
           }
         end
       }
