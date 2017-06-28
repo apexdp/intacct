@@ -67,7 +67,7 @@ module IntacctRB
       @response = Nokogiri::XML(res.body)
       puts res.body
       if successful?
-        if key = response.at('//result//RECORDNO')
+        if key = response.at('//result//RECORDNO') || response.at('//result//key')
           set_intacct_id key.content if object
         end
 
