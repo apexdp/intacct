@@ -21,6 +21,26 @@ module IntacctRB
       object.intacct_id
     end
 
+    def update
+      raise 'You must pass an id to update an ap payment' unless object.intacct_id.present?
+
+      send_xml('update') do |xml|
+        xml.function(controlid: "f1") {
+          xml.update {
+            xml.appayment(key: object.intacct_id) {
+              ap_payment_xml xml
+            }
+          }
+        }
+      end
+
+      if !successful?
+        raise(response.at('//error//description2'))
+      end
+
+      object.intacct_id
+    end
+
     def reverse
       return false unless object.id.present?
 
@@ -132,9 +152,9 @@ module IntacctRB
     end
 
     def ap_payment_xml xml
-      xml.key object.intacct_id if object.intacct_id
-      xml.bankaccountid object.bank_account_id if object.bank_account_id
-      xml.chargecardid object.charge_card_id if object.charge_card_id
+      xml.key object.intacct_id unless object.intacct_id.blank?
+      xml.bankaccountid object.bank_account_id unless object.bank_account_id.blank?
+      xml.chargecardid object.charge_card_id unless object.charge_card_id.blank?
       xml.vendorid object.vendor_id
       xml.memo object.memo
       xml.paymentmethod object.payment_method
