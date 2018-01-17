@@ -3,7 +3,7 @@ module IntacctRB
     def create
       send_xml('create') do |xml|
         xml.function(controlid: "1") {
-          xml.send("create_employee") {
+          xml.send("create") {
             employee_xml(xml)
           }
         }
@@ -105,23 +105,25 @@ module IntacctRB
     end
 
     def employee_xml xml
-      xml.employeeid object.intacct_id if object.intacct_id
-      xml.title object.title if object.title
-      xml.personalinfo {
-        xml.contactname object.name
+      xml.employee {
+        xml.employeeid object.intacct_id if object.intacct_id
+        xml.title object.title if object.title
+        xml.personalinfo {
+          xml.contactname object.name
+        }
+        xml.locationid object.location_id if object.location_id
+        xml.departmentid object.departmentid if object.department_id
+        xml.classid object.classid if object.department_id
+        xml.supervisorid object.supervisorid if object.department_id
+        xml.birthdate date_string(object.birthdate) if object.birthdate
+        xml.startdate date_string(object.startdate) if object.startdate
+        xml.enddate date_string(object.enddate) if object.enddate
+        xml.terminationtype object.terminationtype if object.terminationtype
+        xml.employeetype object.employeetype if object.employeetype
+        xml.gender object.gender if object.gender
+        xml.status object.status if object.status
+        xml.currency object.currency if object.currency
       }
-      xml.locationid object.location_id if object.location_id
-      xml.departmentid object.departmentid if object.department_id
-      xml.classid object.classid if object.department_id
-      xml.supervisorid object.supervisorid if object.department_id
-      xml.birthdate date_string(object.birthdate) if object.birthdate
-      xml.startdate date_string(object.startdate) if object.startdate
-      xml.enddate date_string(object.enddate) if object.enddate
-      xml.terminationtype object.terminationtype if object.terminationtype
-      xml.employeetype object.employeetype if object.employeetype
-      xml.gender object.gender if object.gender
-      xml.status object.status if object.status
-      xml.currency object.currency if object.currency
     end
   end
 end
