@@ -5,6 +5,7 @@ require 'hooks'
 require 'ostruct'
 require "intacctrb/base"
 require "intacctrb/customer"
+require "intacctrb/employee"
 require "intacctrb/journal_entry"
 require "intacctrb/vendor"
 require "intacctrb/invoice"
