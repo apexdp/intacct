@@ -12,19 +12,19 @@ module IntacctRB
       successful?
     end
 
-    def get *fields
-      #return false unless object.intacct_system_id.present?
+    def get(options = {})
+      # return false unless object.intacct_system_id.present?
 
-      fields = [
+      options[:fields] = [
         :employeeid,
-        :personalinfo
-      ] if fields.empty?
+        :contactname
+      ] if options[:fields].nil?
 
       send_xml('get') do |xml|
         xml.function(controlid: "f4") {
           xml.read {
             xml.object 'EMPLOYEE'
-            xml.keys object.intacct_id
+            xml.keys object.try(:intacct_id) || options[:intacct_id]
             xml.fields '*'
           }
         }
@@ -32,8 +32,8 @@ module IntacctRB
 
       if successful?
         @data = OpenStruct.new({
-          id: response.at("//employee//employeeid").content,
-          name: response.at("//employee//personalinfo//contactname").content
+          id: response.at("//EMPLOYEE/RECORDNO").content,
+          name: response.at("//EMPLOYEE/PERSONALINFO/CONTACTNAME").content
         })
       end
 
@@ -95,7 +95,7 @@ module IntacctRB
 
       @response = send_xml('delete') do |xml|
         xml.function(controlid: "1") {
-          xml.delete_customer(employeeid: intacct_system_id)
+          xml.delete_employee(employeeid: intacct_system_id)
         }
       end
 

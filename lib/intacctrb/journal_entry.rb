@@ -51,7 +51,7 @@ module IntacctRB
             xml.query options[:filter]
             if options[:fields]
               xml.fields {
-                fields.each do |field|
+                options[:fields].each do |field|
                   xml.field field.to_s
                 end
               }
@@ -87,7 +87,7 @@ module IntacctRB
             xml.keys object.try(:intacct_id) || options[:intacct_id]
             if options[:fields]
               xml.fields {
-                fields.each do |field|
+                options[:fields].each do |field|
                   xml.field field.to_s
                 end
               }
