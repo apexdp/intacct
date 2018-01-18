@@ -34,7 +34,8 @@ module IntacctRB
         @data = OpenStruct.new({
           id: response.at("//EMPLOYEE/RECORDNO").content,
           name: response.at("//EMPLOYEE/PERSONALINFO/CONTACTNAME").content,
-          contact_id: response.at("//EMPLOYEE/CONTACTKEY").content
+          contact_id: response.at("//EMPLOYEE/CONTACTKEY").content,
+          employee_id: response.at("//EMPLOYEE/EMPLOYEEID").content
         })
       end
 

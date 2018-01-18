@@ -4,6 +4,7 @@ require 'nokogiri'
 require 'hooks'
 require 'ostruct'
 require "intacctrb/base"
+require "intacctrb/contact"
 require "intacctrb/customer"
 require "intacctrb/employee"
 require "intacctrb/journal_entry"
