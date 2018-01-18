@@ -22,12 +22,10 @@ module IntacctRB
 
       send_xml('get') do |xml|
         xml.function(controlid: "f4") {
-          xml.get(object: "employee", key: "intacct_system_id") {
-            xml.fields {
-              fields.each do |field|
-                xml.field field.to_s
-              end
-            }
+          xml.read {
+            xml.object 'EMPLOYEE'
+            xml.keys object.intacct_id
+            xml.fields '*'
           }
         }
       end
