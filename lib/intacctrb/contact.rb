@@ -1,10 +1,10 @@
 module IntacctRB
-  class Employee < IntacctRB::Base
+  class Contact < IntacctRB::Base
     def create
       send_xml('create') do |xml|
         xml.function(controlid: "1") {
           xml.send("create") {
-            employee_xml(xml)
+            contact_xml(xml)
           }
         }
       end
@@ -16,14 +16,14 @@ module IntacctRB
       # return false unless object.intacct_id.present?
 
       options[:fields] = [
-        :employeeid,
+        :contactid,
         :contactname
       ] if options[:fields].nil?
 
       send_xml('get') do |xml|
         xml.function(controlid: "f4") {
           xml.read {
-            xml.object 'EMPLOYEE'
+            xml.object 'contact'
             xml.keys object.try(:intacct_id) || options[:intacct_id]
             xml.fields '*'
           }
@@ -32,9 +32,8 @@ module IntacctRB
 
       if successful?
         @data = OpenStruct.new({
-          id: response.at("//EMPLOYEE/RECORDNO").content,
-          name: response.at("//EMPLOYEE/PERSONALINFO/CONTACTNAME").content,
-          contact_id: response.at("//EMPLOYEE/CONTACTKEY").content
+          id: response.at("//contact/RECORDNO").content,
+          name: response.at("//contact/PERSONALINFO/CONTACTNAME").content
         })
       end
 
@@ -52,7 +51,7 @@ module IntacctRB
 
       send_xml('get_list') do |xml|
         xml.function(controlid: "f4") {
-          xml.get_list(object: "employee", maxitems: "10", showprivate:"false") {
+          xml.get_list(object: "contact", maxitems: "10", showprivate:"false") {
             # xml.fields {
             #   fields.each do |field|
             #     xml.field field.to_s
@@ -74,14 +73,14 @@ module IntacctRB
       puts response
     end
 
-    def update updated_employee = false
-      @object = updated_employee if updated_employee
+    def update updated_contact = false
+      @object = updated_contact if updated_contact
       return false unless object.intacct_id.present?
 
       send_xml('update') do |xml|
         xml.function(controlid: "1") {
           xml.update {
-            employee_xml(xml)
+            contact_xml(xml, true)
           }
         }
       end
@@ -94,32 +93,36 @@ module IntacctRB
 
       @response = send_xml('delete') do |xml|
         xml.function(controlid: "1") {
-          xml.delete_employee(employeeid: intacct_id)
+          xml.delete_contact(contactid: intacct_id)
         }
       end
 
       successful?
     end
 
-    def employee_xml xml
-      xml.employee {
-        xml.recordno if object.intacct_id
-        xml.title object.title if object.title
-        xml.personalinfo {
-          xml.contactname object.name
-        }
-        xml.locationid object.location_id if object.location_id
-        xml.departmentid object.departmentid if object.department_id
-        xml.classid object.classid if object.department_id
-        xml.supervisorid object.supervisorid if object.department_id
-        xml.birthdate date_string(object.birthdate) if object.birthdate
-        xml.startdate date_string(object.startdate) if object.startdate
-        xml.enddate date_string(object.enddate) if object.enddate
-        xml.terminationtype object.terminationtype if object.terminationtype
-        xml.employeetype object.employeetype if object.employeetype
-        xml.gender object.gender if object.gender
-        xml.status object.status if object.status
-        xml.currency object.currency if object.currency
+    def contact_xml(xml, is_update = false)
+      xml.contact {
+        xml.recordno object.intacct_id if object.intacct_id
+        xml.contactname object.name unless (is_update || object.intacct_id.nil?)
+        xml.printas object.name
+        # COMPANYNAME	Optional	string	Company name
+        # TAXABLE	Optional	boolean	Taxable. Use false for No, true for Yes. (Default: true)
+        # TAXGROUP	Optional	string	Contact tax group name
+        # PREFIX	Optional	string	Prefix
+        # FIRSTNAME	Optional	string	First name
+        # LASTNAME	Optional	string	Last name
+        # INITIAL	Optional	string	Middle name
+        # PHONE1	Optional	string	Primary phone number
+        # PHONE2	Optional	string	Secondary phone number
+        # CELLPHONE	Optional	string	Cellular phone number
+        # PAGER	Optional	string	Pager number
+        # FAX	Optional	string	Fax number
+        # EMAIL1	Optional	string	Primary email address
+        # EMAIL2	Optional	string	Secondary email address
+        # URL1	Optional	string	Primary URL
+        # URL2	Optional	string	Secondary URL
+        # STATUS	Optional	string	Status. Use active for Active or inactive for Inactive (Default: active)
+        # MAILADDRESS	Optional	object	Mail address
       }
     end
   end
