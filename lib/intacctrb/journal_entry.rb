@@ -174,10 +174,10 @@ module IntacctRB
             xml.description row[:memo]
             xml.location row[:location_id] if row[:location_id]
             xml.department row[:department_id] if row[:department_id]
-            xml.customer row[:customer_id] if row[:customer_id]
-            xml.employee row[:employee_id] if row[:employee_id]
+            xml.customerid row[:customer_id] if row[:customer_id]
+            xml.employeeid row[:employee_id] if row[:employee_id]
             xml.projectid row[:project_id] if row[:project_id]
-            xml.item row[:item_id] if row[:itemid]
+            xml.itemid row[:item_id] if row[:itemid]
             xml.classid row[:class_id] if row[:class_id]
           }
         end
