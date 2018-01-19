@@ -90,6 +90,19 @@ module IntacctRB
       end
     end
 
+    def return_result(response)
+      if successful?
+        data = OpenStruct.new({result: true})
+      else
+        data = OpenStruct.new({result: false})
+        response.xpath("//result/errormessage/error").each do |error|
+          data.error_code = error.at("//errorno").content
+          data.error_description = error.at("//description2").content
+        end
+      end
+      data
+    end
+
     %w(invoice bill vendor customer journal_entry).each do |type|
       define_method "intacct_#{type}_prefix" do
         IntacctRB.send("#{type}_prefix")

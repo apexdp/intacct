@@ -9,7 +9,7 @@ module IntacctRB
         }
       end
 
-      successful?
+      return_result(response)
     end
 
     def get(options = {})
@@ -87,7 +87,7 @@ module IntacctRB
         }
       end
 
-      successful?
+      return_result(response)
     end
 
     def delete
@@ -99,7 +99,7 @@ module IntacctRB
         }
       end
 
-      successful?
+      return_result(response)
     end
 
     def employee_xml xml

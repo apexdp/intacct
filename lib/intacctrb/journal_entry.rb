@@ -13,7 +13,7 @@ module IntacctRB
         }
       end
 
-      successful?
+      return_result(response)
     end
 
     def update
@@ -28,7 +28,7 @@ module IntacctRB
         }
       end
 
-      successful?
+      return_result(response)
     end
 
     # def delete
@@ -191,6 +191,5 @@ module IntacctRB
         date
       end
     end
-
   end
 end

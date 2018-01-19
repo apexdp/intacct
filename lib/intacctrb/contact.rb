@@ -9,7 +9,7 @@ module IntacctRB
         }
       end
 
-      successful?
+      return_result(response)
     end
 
     def get(options = {})
@@ -85,7 +85,7 @@ module IntacctRB
         }
       end
 
-      successful?
+      return_result(response)
     end
 
     def delete
@@ -97,7 +97,7 @@ module IntacctRB
         }
       end
 
-      successful?
+      return_result(response)
     end
 
     def contact_xml(xml, is_update = false)
