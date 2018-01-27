@@ -29,57 +29,67 @@ module IntacctRB
     private
 
     def send_xml action
-      @intacct_action = action.to_s
-      run_hook :"before_#{intacct_action}" if action=="create"
+      retry_count = 0
+      begin
+        @intacct_action = action.to_s
+        run_hook :"before_#{intacct_action}" if action=="create"
 
-      builder = Nokogiri::XML::Builder.new do |xml|
-        xml.request {
-          xml.control {
-            xml.senderid IntacctRB.xml_sender_id
-            xml.password IntacctRB.xml_password
-            xml.controlid "INVOICE XML"
-            xml.uniqueid "false"
-            xml.dtdversion "3.0"
-          }
-          xml.operation(transaction: "false") {
-            xml.authentication {
-              xml.login {
-                xml.userid IntacctRB.app_user_id
-                xml.companyid IntacctRB.app_company_id
-                xml.password IntacctRB.app_password
+        builder = Nokogiri::XML::Builder.new do |xml|
+          xml.request {
+            xml.control {
+              xml.senderid IntacctRB.xml_sender_id
+              xml.password IntacctRB.xml_password
+              xml.controlid "INVOICE XML"
+              xml.uniqueid "false"
+              xml.dtdversion "3.0"
+            }
+            xml.operation(transaction: "false") {
+              xml.authentication {
+                xml.login {
+                  xml.userid IntacctRB.app_user_id
+                  xml.companyid IntacctRB.app_company_id
+                  xml.password IntacctRB.app_password
+                }
+              }
+              xml.content {
+                yield xml
               }
             }
-            xml.content {
-              yield xml
-            }
           }
-        }
-      end
-
-      xml = builder.doc.root.to_xml
-      puts xml
-      @sent_xml = xml
-
-      url = "https://www.intacct.com/ia/xml/xmlgw.phtml"
-      uri = URI(url)
-
-      res = Net::HTTP.post_form(uri, 'xmlrequest' => xml)
-      @response = Nokogiri::XML(res.body)
-      puts res.body
-      if successful?
-        if key = response.at('//result//RECORDNO') || response.at('//result//key')
-          set_intacct_id key.content if object
         end
 
-        if intacct_action
-          run_hook :after_send_xml, intacct_action
-          #run_hook :"after_#{intacct_action}"
-        end
-      else
-        run_hook :on_error
-      end
+        xml = builder.doc.root.to_xml
+        IntacctRB.logger.info xml
+        @sent_xml = xml
 
-      @response
+        url = "https://www.intacct.com/ia/xml/xmlgw.phtml"
+        uri = URI(url)
+        retry_count += 1
+        res = Net::HTTP.post_form(uri, 'xmlrequest' => xml)
+        @response = Nokogiri::XML(res.body)
+        IntacctRB.logger.info res.body
+        if successful?
+          if key = response.at('//result//RECORDNO') || response.at('//result//key')
+            set_intacct_id key.content if object
+          end
+
+          if intacct_action
+            run_hook :after_send_xml, intacct_action
+            #run_hook :"after_#{intacct_action}"
+          end
+        else
+          run_hook :on_error
+        end
+        @response
+      rescue Net::ReadTimeout => e
+        if retry_count <= 3
+          IntacctRB.logger.warning "Net::ReadTimeout in IntacctRB; retrying"
+          retry
+        else
+          IntacctRB.logger.error "Net::ReadTimeout in IntacctRB; retries exhausted"
+          raise e
+        end
+      end
     end
 
     def successful?
@@ -92,7 +102,7 @@ module IntacctRB
 
     def return_result(response)
       if successful?
-        data = OpenStruct.new({result: true})
+        data = OpenStruct.new({result: true, object: response})
       else
         data = OpenStruct.new({result: false})
         response.xpath("//result/errormessage/error").each do |error|

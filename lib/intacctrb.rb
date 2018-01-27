@@ -3,6 +3,7 @@ require 'net/http'
 require 'nokogiri'
 require 'hooks'
 require 'ostruct'
+require "intacctrb/logger"
 require "intacctrb/base"
 require "intacctrb/contact"
 require "intacctrb/customer"
