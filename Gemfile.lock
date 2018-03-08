@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    intacctrb (0.6.4)
+    intacctrb (0.6.5)
       hooks
       nokogiri
 
@@ -110,4 +110,4 @@ DEPENDENCIES
   turnip
 
 BUNDLED WITH
-   1.12.5
+   1.16.1

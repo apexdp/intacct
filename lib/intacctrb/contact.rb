@@ -33,7 +33,7 @@ module IntacctRB
       if successful?
         @data = OpenStruct.new({
           id: response.at("//contact/RECORDNO").content,
-          name: response.at("//contact/PERSONALINFO/CONTACTNAME").content
+          name: response.at("//contact/CONTACTNAME").content
         })
       end
 
