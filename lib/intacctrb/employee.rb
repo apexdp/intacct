@@ -1,7 +1,7 @@
 module IntacctRB
   class Employee < IntacctRB::Base
     def create
-      send_xml('create') do |xml|
+      response = send_xml('create') do |xml|
         xml.function(controlid: "1") {
           xml.send("create") {
             employee_xml(xml)
@@ -20,7 +20,7 @@ module IntacctRB
         :contactname
       ] if options[:fields].nil?
 
-      send_xml('get') do |xml|
+      response = send_xml('get') do |xml|
         xml.function(controlid: "f4") {
           xml.read {
             xml.object 'EMPLOYEE'
@@ -31,7 +31,7 @@ module IntacctRB
       end
 
       if successful?
-        @data = OpenStruct.new({
+        data = OpenStruct.new({
           id: response.at("//EMPLOYEE/RECORDNO").content,
           name: response.at("//EMPLOYEE/PERSONALINFO/CONTACTNAME").content,
           contact_id: response.at("//EMPLOYEE/CONTACTKEY").content,
@@ -39,7 +39,37 @@ module IntacctRB
         })
       end
 
-      successful?
+      return_result(response, data)
+    end
+
+    def get_by_employee_id(options = {})
+      # return false unless object.intacct_id.present?
+
+      # options[:fields] = [
+      #   :contactid,
+      #   :contactname
+      # ] if options[:fields].nil?
+
+      response = send_xml('get') do |xml|
+        xml.function(controlid: "f4") {
+          xml.readByName {
+            xml.object 'EMPLOYEE'
+            xml.keys object.try(:employee_id) || options[:employee_id]
+            xml.fields '*'
+          }
+        }
+      end
+
+      if successful?
+        data = OpenStruct.new({
+          id: response.at("//EMPLOYEE/RECORDNO").content,
+          name: response.at("//EMPLOYEE/PERSONALINFO/CONTACTNAME").content,
+          contact_id: response.at("//EMPLOYEE/CONTACTKEY").content,
+          employee_id: response.at("//EMPLOYEE/EMPLOYEEID").content
+        })
+      end
+
+      return_result(response, data)
     end
 
     def get_list *fields
@@ -51,7 +81,7 @@ module IntacctRB
         :termname
       ] if fields.empty?
 
-      send_xml('get_list') do |xml|
+      response = send_xml('get_list') do |xml|
         xml.function(controlid: "f4") {
           xml.get_list(object: "employee", maxitems: "10", showprivate:"false") {
             # xml.fields {
@@ -62,24 +92,13 @@ module IntacctRB
           }
         }
       end
-
-      # if successful?
-      #   @data = OpenStruct.new({
-      #     id: response.at("//customer//customerid").content,
-      #     name: response.at("//customer//name").content,
-      #     termname: response.at("//customer//termname").content
-      #   })
-      # end
-      #
-      # successful?
-      puts response
+      return_result(response)
     end
 
     def update updated_employee = false
       @object = updated_employee if updated_employee
       return false unless object.intacct_id.present?
-
-      send_xml('update') do |xml|
+      response = send_xml('update') do |xml|
         xml.function(controlid: "1") {
           xml.update {
             employee_xml(xml)
@@ -93,7 +112,7 @@ module IntacctRB
     def delete
       return false unless object.intacct_id.present?
 
-      @response = send_xml('delete') do |xml|
+      response = send_xml('delete') do |xml|
         xml.function(controlid: "1") {
           xml.delete_employee(employeeid: intacct_id)
         }
@@ -104,7 +123,7 @@ module IntacctRB
 
     def employee_xml xml
       xml.employee {
-        xml.recordno if object.intacct_id
+        xml.recordno object.intacct_id if object.intacct_id
         xml.title object.title if object.title
         xml.personalinfo {
           xml.contactname object.name

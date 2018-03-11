@@ -100,9 +100,9 @@ module IntacctRB
       end
     end
 
-    def return_result(response)
+    def return_result(response, data = nil)
       if successful?
-        data = OpenStruct.new({result: true, object: response})
+        data = OpenStruct.new({result: true, object: response, data: data})
       else
         data = OpenStruct.new({result: false})
         response.xpath("//result/errormessage/error").each do |error|

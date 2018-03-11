@@ -1,7 +1,7 @@
 module IntacctRB
   class Contact < IntacctRB::Base
     def create
-      send_xml('create') do |xml|
+      response = send_xml('create') do |xml|
         xml.function(controlid: "1") {
           xml.send("create") {
             contact_xml(xml)
@@ -12,6 +12,34 @@ module IntacctRB
       return_result(response)
     end
 
+    def get_by_name(options = {})
+      # return false unless object.intacct_id.present?
+
+      options[:fields] = [
+        :contactid,
+        :contactname
+      ] if options[:fields].nil?
+
+      response = send_xml('get') do |xml|
+        xml.function(controlid: "f4") {
+          xml.readByName {
+            xml.object 'contact'
+            xml.keys object.try(:name) || options[:name]
+            xml.fields '*'
+          }
+        }
+      end
+
+      if successful?
+        data = OpenStruct.new({
+          id: response.at("//contact/RECORDNO").try(:content),
+          name: response.at("//contact/CONTACTNAME").try(:content)
+        })
+      end
+
+      return_result(response, data)
+    end
+
     def get(options = {})
       # return false unless object.intacct_id.present?
 
@@ -20,7 +48,7 @@ module IntacctRB
         :contactname
       ] if options[:fields].nil?
 
-      send_xml('get') do |xml|
+      response = send_xml('get') do |xml|
         xml.function(controlid: "f4") {
           xml.read {
             xml.object 'contact'
@@ -31,13 +59,13 @@ module IntacctRB
       end
 
       if successful?
-        @data = OpenStruct.new({
+        data = OpenStruct.new({
           id: response.at("//contact/RECORDNO").content,
           name: response.at("//contact/CONTACTNAME").content
         })
       end
 
-      successful?
+      return_result(response, data)
     end
 
     def get_list *fields
@@ -49,7 +77,7 @@ module IntacctRB
         :termname
       ] if fields.empty?
 
-      send_xml('get_list') do |xml|
+      response = send_xml('get_list') do |xml|
         xml.function(controlid: "f4") {
           xml.get_list(object: "contact", maxitems: "10", showprivate:"false") {
             # xml.fields {
@@ -70,14 +98,14 @@ module IntacctRB
       # end
       #
       # successful?
-      puts response
+      return_result(response)
     end
 
     def update updated_contact = false
       @object = updated_contact if updated_contact
       return false unless object.intacct_id.present?
 
-      send_xml('update') do |xml|
+      response = send_xml('update') do |xml|
         xml.function(controlid: "1") {
           xml.update {
             contact_xml(xml, true)
@@ -91,7 +119,7 @@ module IntacctRB
     def delete
       return false unless object.intacct_id.present?
 
-      @response = send_xml('delete') do |xml|
+      response = send_xml('delete') do |xml|
         xml.function(controlid: "1") {
           xml.delete_contact(contactid: intacct_id)
         }
@@ -103,8 +131,8 @@ module IntacctRB
     def contact_xml(xml, is_update = false)
       xml.contact {
         xml.recordno object.intacct_id if object.intacct_id
-        xml.contactname object.name unless (is_update || object.intacct_id.nil?)
-        xml.printas object.name
+        xml.contactname object.name if object.name
+        xml.printas object.name if object.name
         # COMPANYNAME	Optional	string	Company name
         # TAXABLE	Optional	boolean	Taxable. Use false for No, true for Yes. (Default: true)
         # TAXGROUP	Optional	string	Contact tax group name
