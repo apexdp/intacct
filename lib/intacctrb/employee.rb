@@ -32,10 +32,10 @@ module IntacctRB
 
       if successful?
         data = OpenStruct.new({
-          id: response.at("//EMPLOYEE/RECORDNO").content,
-          name: response.at("//EMPLOYEE/PERSONALINFO/CONTACTNAME").content,
-          contact_id: response.at("//EMPLOYEE/CONTACTKEY").content,
-          employee_id: response.at("//EMPLOYEE/EMPLOYEEID").content
+          id: response.at("//EMPLOYEE/RECORDNO").try(:content),
+          name: response.at("//EMPLOYEE/PERSONALINFO/CONTACTNAME").try(:content),
+          contact_id: response.at("//EMPLOYEE/CONTACTKEY").try(:content),
+          employee_id: response.at("//EMPLOYEE/EMPLOYEEID").try(:content)
         })
       end
 
@@ -62,10 +62,10 @@ module IntacctRB
 
       if successful?
         data = OpenStruct.new({
-          id: response.at("//EMPLOYEE/RECORDNO").content,
-          name: response.at("//EMPLOYEE/PERSONALINFO/CONTACTNAME").content,
-          contact_id: response.at("//EMPLOYEE/CONTACTKEY").content,
-          employee_id: response.at("//EMPLOYEE/EMPLOYEEID").content
+          id: response.at("//EMPLOYEE/RECORDNO").try(:content),
+          name: response.at("//EMPLOYEE/PERSONALINFO/CONTACTNAME").try(:content),
+          contact_id: response.at("//EMPLOYEE/CONTACTKEY").try(:content),
+          employee_id: response.at("//EMPLOYEE/EMPLOYEEID").try(:content)
         })
       end
 

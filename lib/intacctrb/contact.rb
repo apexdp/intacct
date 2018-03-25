@@ -60,8 +60,8 @@ module IntacctRB
 
       if successful?
         data = OpenStruct.new({
-          id: response.at("//contact/RECORDNO").content,
-          name: response.at("//contact/CONTACTNAME").content
+          id: response.at("//contact/RECORDNO").try(:content),
+          name: response.at("//contact/CONTACTNAME").try(:content)
         })
       end
 
