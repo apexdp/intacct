@@ -102,12 +102,17 @@ module IntacctRB
 
     def return_result(response, data = nil)
       if successful?
-        data = OpenStruct.new({result: true, object: response, data: data})
+        data = OpenStruct.new({result: true, intacct_id: object.intacct_id,
+          object: response, data: data})
       else
         data = OpenStruct.new({result: false})
+        data.errors = {}
         response.xpath("//result/errormessage/error").each do |error|
-          data.error_code = error.at("//errorno").content
-          data.error_description = error.at("//description2").content
+          data.errors << {
+            code: error.at("//errorno").content,
+            title: error.at("//description").content,
+            description: error.at("//description2").content
+          }
         end
       end
       data
