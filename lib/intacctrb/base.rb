@@ -105,7 +105,7 @@ module IntacctRB
         data = OpenStruct.new({result: true, intacct_id: object.intacct_id,
           object: response, data: data})
       else
-        data = OpenStruct.new({result: false})
+        data = OpenStruct.new({result: false, intacct_id: object.intacct_id})
         data.errors = {}
         response.xpath("//result/errormessage/error").each do |error|
           data.errors << {

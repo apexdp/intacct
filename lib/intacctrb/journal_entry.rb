@@ -2,33 +2,37 @@ module IntacctRB
   class JournalEntry < IntacctRB::Base
 
     def create
-      return false if object.intacct_id.present?
-      send_xml('create') do |xml|
-        xml.function(controlid: "f1") {
-          xml.send("create") {
-            xml.glbatch {
-              je_xml xml
+      if object.intacct_id.present?
+        return_error('You tried to create an object that already had an intacct_id')
+      else
+        send_xml('create') do |xml|
+          xml.function(controlid: "f1") {
+            xml.send("create") {
+              xml.glbatch {
+                je_xml xml
+              }
             }
           }
-        }
+        end
+        return_result(response)
       end
-
-      return_result(response)
     end
 
     def update
-      return false unless object.intacct_id.present?
-      send_xml('update') do |xml|
-        xml.function(controlid: "f1") {
-          xml.send("update") {
-            xml.glbatch {
-              je_xml xml
+      unless object.intacct_id.present?
+        return_error('You tried to update an object without an intacct_id')
+      else
+        send_xml('update') do |xml|
+          xml.function(controlid: "f1") {
+            xml.send("update") {
+              xml.glbatch {
+                je_xml xml
+              }
             }
           }
-        }
+        end
+        return_result(response)
       end
-
-      return_result(response)
     end
 
     # def delete
