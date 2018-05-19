@@ -106,7 +106,7 @@ module IntacctRB
           object: response, data: data})
       else
         data = OpenStruct.new({result: false, intacct_id: object.intacct_id})
-        data.errors = {}
+        data.errors = []
         response.xpath("//result/errormessage/error").each do |error|
           data.errors << {
             code: error.at("//errorno").content,
