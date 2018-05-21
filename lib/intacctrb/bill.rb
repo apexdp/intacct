@@ -24,7 +24,7 @@ module IntacctRB
     end
 
     def update
-      raise 'You must pass an id to update a bill' unless object.intacct_id.present?
+      raise IntacctRB::Exceptions::Bill.new('You must pass an id to update a bill') unless object.intacct_id.present?
 
       send_xml('update') do |xml|
         xml.function(controlid: "f1") {
@@ -37,22 +37,27 @@ module IntacctRB
       end
 
       if !successful?
-        raise(response.at('//error//description2'))
+        raise IntacctRB::Exceptions::Bill.new(response.at('//error//description2'))
       end
 
       object.intacct_id
     end
 
     def delete
-      # return false unless object.intacct_system_id.present?
+      return false unless object.intacct_id.present?
 
       send_xml('delete') do |xml|
-        xml.function(controlid: "1") {
-          xml.delete_bill(externalkey: "false", key: object.intacct_key)
+        xml.function(controlid: "f1") {
+          xml.delete {
+            xml.object 'APBILL'
+            xml.keys object.intacct_id
+          }
         }
       end
 
-      successful?
+      if !successful?
+        raise IntacctRB::Exceptions::Bill.new(response.at('//error//description2'))
+      end
     end
 
     def get_list(options = {})
