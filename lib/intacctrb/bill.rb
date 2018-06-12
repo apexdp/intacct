@@ -146,7 +146,9 @@ module IntacctRB
             xml.amount line_item.amount
             xml.entrydescription line_item.memo
             xml.locationid line_item.location_id
+            xml.departmentid line_item.department_id
             xml.projectid line_item.project_id
+            xml.classid line_item.class_id
           }
         end
       }
