@@ -125,6 +125,7 @@ module IntacctRB
 
     def bill_xml xml
       xml.recordno object.intacct_id
+      xml.ponumber object.po_number
       xml.vendorid object.vendor_id
       xml.whenposted object.posted_at
       xml.whencreated object.invoice_date
