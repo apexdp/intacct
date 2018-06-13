@@ -16,11 +16,7 @@ module IntacctRB
         }
       end
 
-      if !successful?
-        raise IntacctRB::Exceptions::Bill.new(response.at('//error//description2'))
-      end
-
-      object.intacct_id
+      return_result(response)
     end
 
     def update
@@ -36,11 +32,7 @@ module IntacctRB
         }
       end
 
-      if !successful?
-        raise IntacctRB::Exceptions::Bill.new(response.at('//error//description2'))
-      end
-
-      object.intacct_id
+      return_result(response)
     end
 
     def delete
@@ -55,9 +47,7 @@ module IntacctRB
         }
       end
 
-      if !successful?
-        raise IntacctRB::Exceptions::Bill.new(response.at('//error//description2'))
-      end
+      return_result(response)
     end
 
     def get_list(options = {})
