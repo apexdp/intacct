@@ -127,6 +127,7 @@ module IntacctRB
       xml.whendue object.due_date
       xml.action object.action
       xml.recordid object.record_id
+      xml.docnumber object.reference_number
       xml.supdocid object.supdoc_id
 
       xml.apbillitems {
