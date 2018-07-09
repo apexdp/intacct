@@ -18,7 +18,7 @@ module IntacctRB
         })
       end
 
-      return_result(response)
+      return_result(response, data)
     end
 
     def get(options = {})
