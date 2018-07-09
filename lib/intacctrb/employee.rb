@@ -11,10 +11,10 @@ module IntacctRB
 
       if successful?
         data = OpenStruct.new({
-          id: response.at("//EMPLOYEE/RECORDNO").try(:content),
-          name: response.at("//EMPLOYEE/PERSONALINFO/CONTACTNAME").try(:content),
-          contact_id: response.at("//EMPLOYEE/CONTACTKEY").try(:content),
-          employee_id: response.at("//EMPLOYEE/EMPLOYEEID").try(:content)
+          id: response.at("//RECORDNO").try(:content),
+          name: response.at("//PERSONALINFO/CONTACTNAME").try(:content),
+          contact_id: response.at("//CONTACTKEY").try(:content),
+          employee_id: response.at("//EMPLOYEEID").try(:content)
         })
       end
 
