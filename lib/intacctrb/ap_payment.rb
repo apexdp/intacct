@@ -155,6 +155,8 @@ module IntacctRB
       xml.key object.intacct_id unless object.intacct_id.blank?
       xml.bankaccountid object.bank_account_id unless object.bank_account_id.blank?
       xml.chargecardid object.charge_card_id unless object.charge_card_id.blank?
+      xml.empower_id if object.empower_id
+      xml.empower_class if object.empower_class
       xml.vendorid object.vendor_id
       xml.memo object.memo
       xml.paymentmethod object.payment_method

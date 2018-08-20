@@ -160,6 +160,8 @@ module IntacctRB
 
     def je_xml xml
       xml.recordno object.intacct_id if object.intacct_id
+      xml.empower_id if object.empower_id
+      xml.empower_class if object.empower_class
       xml.journal object.journal_id
       xml.batch_date date_string(object.date) if object.date
       xml.reverse_date date_string(object.reverse_date) if object.reverse_date
