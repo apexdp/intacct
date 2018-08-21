@@ -129,6 +129,7 @@ module IntacctRB
       xml.recordid object.record_id if object.record_id
       xml.docnumber object.reference_number if object.reference_number
       xml.supdocid object.supdoc_id if object.supdoc_id
+      custom_fields_xml(xml, object)
       if object.line_items
         xml.apbillitems {
           object.line_items.each do |line_item|
