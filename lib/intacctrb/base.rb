@@ -59,7 +59,7 @@ module IntacctRB
         end
 
         xml = builder.doc.root.to_xml
-        IntacctRB.logger.info xml
+        IntacctRB.logger.debug xml
         @sent_xml = xml
 
         url = "https://www.intacct.com/ia/xml/xmlgw.phtml"
@@ -67,7 +67,7 @@ module IntacctRB
         retry_count += 1
         res = Net::HTTP.post_form(uri, 'xmlrequest' => xml)
         @response = Nokogiri::XML(res.body)
-        IntacctRB.logger.info res.body
+        IntacctRB.logger.debug res.body
         if successful?
           if key = response.at('//result//RECORDNO') || response.at('//result//key')
             set_intacct_id key.content if object
