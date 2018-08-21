@@ -164,14 +164,14 @@ module IntacctRB
       xml.customfields {
         if object.empower_id
           xml.customfield {
-            xml.customfield_name 'empower_id'
-            xml.customfield_value object.empower_id
+            xml.customfieldname 'empower_id'
+            xml.customfieldvalue object.empower_id
           }
         end
         if object.empower_class
           xml.customfield {
-            xml.customfield_name 'empower_class'
-            xml.customfield_value object.empower_class
+            xml.customfieldname 'empower_class'
+            xml.customfieldvalue object.empower_class
           }
         end
       }
