@@ -159,5 +159,22 @@ module IntacctRB
       xml.month date.to_date.strftime("%m")
       xml.day date.to_date.strftime("%d")
     end
+
+    def custom_fields_xml(xml, object)
+      xml.customfields {
+        if object.empower_id
+          xml.customfield {
+            xml.customfield_name 'empower_id'
+            xml.customfield_value object.empower_id
+          }
+        end
+        if object.empower_class
+          xml.customfield {
+            xml.customfield_name 'empower_class'
+            xml.customfield_value object.empower_class
+          }
+        end
+      }
+    end
   end
 end

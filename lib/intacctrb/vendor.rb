@@ -94,6 +94,7 @@ module IntacctRB
       xml.status "active"
       xml.vendoraccountno object.vendor_account_number
       xml.paymethod object.payment_method
+      custom_fields_xml(xml, object)
       xml.onetime object.one_time || false
       xml.displaycontact {
         contact_xml(xml, object.display_contact)
