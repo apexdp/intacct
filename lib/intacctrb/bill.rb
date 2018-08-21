@@ -120,30 +120,30 @@ module IntacctRB
 
     def bill_xml xml
       xml.recordno object.intacct_id
-      xml.po_number object.po_number
-      xml.vendorid object.vendor_id
-      xml.whenposted object.posted_at
-      xml.whencreated object.invoice_date
-      xml.whendue object.due_date
-      xml.action object.action
-      xml.recordid object.record_id
-      xml.docnumber object.reference_number
-      xml.supdocid object.supdoc_id
-
-      xml.apbillitems {
-        object.line_items.each do |line_item|
-          xml.apbillitem {
-            xml.accountno line_item.account_number
-            xml.amount line_item.amount
-            xml.entrydescription line_item.memo
-            xml.locationid line_item.location_id
-            xml.departmentid line_item.department_id
-            xml.projectid line_item.project_id
-            xml.classid line_item.class_id
-          }
-        end
-      }
-
+      xml.po_number object.po_number if object.po_number
+      xml.vendorid object.vendor_id if object.vendor_id
+      xml.whenposted object.posted_at if object.posted_at
+      xml.whencreated object.invoice_date if object.invoice_date
+      xml.whendue object.due_date if object.due_date
+      xml.action object.action if object.action
+      xml.recordid object.record_id if object.record_id
+      xml.docnumber object.reference_number if object.reference_number
+      xml.supdocid object.supdoc_id if object.supdoc_id
+      if object.line_items
+        xml.apbillitems {
+          object.line_items.each do |line_item|
+            xml.apbillitem {
+              xml.accountno line_item.account_number
+              xml.amount line_item.amount
+              xml.entrydescription line_item.memo
+              xml.locationid line_item.location_id
+              xml.departmentid line_item.department_id
+              xml.projectid line_item.project_id
+              xml.classid line_item.class_id
+            }
+          end
+        }
+      end
       run_hook :custom_bill_fields, xml
       run_hook :bill_item_fields, xml
     end
