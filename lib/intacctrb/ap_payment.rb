@@ -165,7 +165,6 @@ module IntacctRB
       }
       xml.checkno object.check_number
       xml.billno object.bill_number
-      custom_fields_xml(xml, object)
       xml.payitems {
         object.line_items.each do |line_item|
           xml.payitem {

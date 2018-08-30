@@ -42,6 +42,7 @@ module IntacctRB
               xml.controlid "INVOICE XML"
               xml.uniqueid "false"
               xml.dtdversion "3.0"
+              xml.includewhitespace "false"
             }
             xml.operation(transaction: "false") {
               xml.authentication {
