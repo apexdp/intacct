@@ -18,27 +18,11 @@ module IntacctRB
         raise IntacctRB::Exceptions::APPayment.new(response.at('//error//description2'))
       end
 
-      object.intacct_id
+      return_result(response)
     end
 
     def update
-      raise 'You must pass an id to update an ap payment' unless object.intacct_id.present?
-
-      send_xml('update') do |xml|
-        xml.function(controlid: "f1") {
-          xml.update {
-            xml.appayment(key: object.intacct_id) {
-              ap_payment_xml xml
-            }
-          }
-        }
-      end
-
-      if !successful?
-        raise(response.at('//error//description2'))
-      end
-
-      object.intacct_id
+      raise 'You intacct doesn\'t support #update on this object'
     end
 
     def reverse
