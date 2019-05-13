@@ -175,6 +175,12 @@ module IntacctRB
             xml.customfieldvalue object.empower_class
           }
         end
+        if object.fixed_asset
+          xml.customfield {
+            xml.customfieldname 'fixed_asset'
+            xml.customfieldvalue object.fixed_asset
+          }
+        end
       }
     end
   end

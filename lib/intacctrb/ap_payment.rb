@@ -27,14 +27,14 @@ module IntacctRB
 
     def reverse
       return false unless object.id.present?
-
+      parsed_date = Date.parse(object.date) rescue Date.today
       send_xml('delete') do |xml|
         xml.function(controlid: "1") {
           xml.reverse_appayment(key: object.id) do |xml|
               xml.datereversed do |xml|
-                xml.year object.date.year
-                xml.month object.date.month
-                xml.day object.date.day
+                xml.year parsed_date.year
+                xml.month parsed_date.month
+                xml.day parsed_date.day
               end
           end
         }
