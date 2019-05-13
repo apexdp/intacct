@@ -84,7 +84,7 @@ module IntacctRB
         @response
       rescue Net::ReadTimeout => e
         if retry_count <= 3
-          IntacctRB.logger.warning "Net::ReadTimeout in IntacctRB; retrying"
+          IntacctRB.logger.warn "Net::ReadTimeout in IntacctRB; retrying"
           retry
         else
           IntacctRB.logger.error "Net::ReadTimeout in IntacctRB; retries exhausted"
