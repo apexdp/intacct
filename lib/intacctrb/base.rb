@@ -66,7 +66,7 @@ module IntacctRB
         url = "https://www.intacct.com/ia/xml/xmlgw.phtml"
         uri = URI(url)
         retry_count += 1
-        res = Net::HTTP.post_form(uri, 'xmlrequest' => xml, read_timeout: 30)
+        res = Net::HTTP.post_form(uri, 'xmlrequest' => xml, read_timeout: 60)
         @response = Nokogiri::XML(res.body)
         IntacctRB.logger.debug res.body
         if successful?
@@ -88,7 +88,13 @@ module IntacctRB
           retry
         else
           IntacctRB.logger.error "Net::ReadTimeout in IntacctRB; retries exhausted"
-          raise e
+          @response = {
+                        result: {
+                          errormessage: {
+                            error: [{ description: e }]
+                          }
+                        }
+                      }
         end
       end
     end
