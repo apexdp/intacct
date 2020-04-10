@@ -88,13 +88,7 @@ module IntacctRB
           retry
         else
           IntacctRB.logger.error "Net::ReadTimeout in IntacctRB; retries exhausted"
-          @response = {
-                        result: {
-                          errormessage: {
-                            error: [{ description: e }]
-                          }
-                        }
-                      }
+          @response = Nokogiri::XML("<result><errormessage><error><errorno></errorno><description>#{e}</description><description2></description2></error></errormessage></result>")
         end
       end
     end
@@ -115,7 +109,7 @@ module IntacctRB
         data = OpenStruct.new({result: false, intacct_id: object.intacct_id})
         data.errors = []
         response.xpath("//result/errormessage/error").each do |error|
-          data.errors << {
+          errors << {
             code: error.at("//errorno").content,
             title: error.at("//description").content,
             description: error.at("//description2").content
