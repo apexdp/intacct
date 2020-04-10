@@ -109,7 +109,7 @@ module IntacctRB
         data = OpenStruct.new({result: false, intacct_id: object.intacct_id})
         data.errors = []
         response.xpath("//result/errormessage/error").each do |error|
-          errors << {
+          data.errors << {
             code: error.at("//errorno").content,
             title: error.at("//description").content,
             description: error.at("//description2").content
