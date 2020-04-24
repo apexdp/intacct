@@ -66,9 +66,15 @@ module IntacctRB
         url = "https://www.intacct.com/ia/xml/xmlgw.phtml"
         uri = URI(url)
         retry_count += 1
-        conn = Net::HTTP.new(uri)
-        conn.read_timeout = 300
-        res = conn.post_form(uri, 'xmlrequest' => xml)
+
+        post_request = Net::HTTP::Post.new(uri.request_uri)
+        post_request.set_form_data('xmlrequest' => xml)
+
+        http = Net::HTTP.new(uri.host, uri.port)
+        http.use_ssl = true
+        http.read_timeout = 300
+        res = http.request(post_request)
+
         @response = Nokogiri::XML(res.body)
         IntacctRB.logger.debug res.body
         if successful?
